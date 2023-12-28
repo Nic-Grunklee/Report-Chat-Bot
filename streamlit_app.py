@@ -1,8 +1,15 @@
 import streamlit as st
-from llama_index import VectorStoreIndex, ServiceContext, Document
 from llama_index.llms import OpenAI
 import openai
-from llama_index import SimpleDirectoryReader
+import os.path
+
+from llama_index import (
+    VectorStoreIndex,
+    SimpleDirectoryReader,
+    StorageContext,
+    load_index_from_storage,
+    ServiceContext
+)
 
 st.set_page_config(page_title="Chat with your CareerScope results, powered by LlamaIndex", page_icon="🦙", layout="centered", initial_sidebar_state="auto", menu_items=None)
 openai.api_key = st.secrets.openai_key
@@ -17,10 +24,18 @@ if "messages" not in st.session_state.keys(): # Initialize the chat messages his
 @st.cache_resource(show_spinner=False)
 def load_data():
     with st.spinner(text="Loading and indexing your CareerScope results – hang tight! This should take 1-2 minutes."):
-        reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
-        docs = reader.load_data()
-        service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, system_prompt="You are an expert on this assessment profile report and your job is to answer technical questions. Assume that all questions are related to the assessment profile report. Keep your answers technical and based on facts – do not hallucinate features."))
-        index = VectorStoreIndex.from_documents(docs, service_context=service_context)
+        PERSIST_DIR = "./storage"
+        if not os.path.exists(PERSIST_DIR):
+          reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
+          docs = reader.load_data()
+          service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, system_prompt="You are an expert on this assessment profile report and your job is to answer technical questions. Assume that all questions are related to the assessment profile report. Keep your answers technical and based on facts – do not hallucinate features."))
+          index = VectorStoreIndex.from_documents(docs, service_context=service_context)
+          # store it for later
+          index.storage_context.persist(persist_dir=PERSIST_DIR)
+        else:
+          # load the existing index
+          storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR)
+          index = load_index_from_storage(storage_context)
         return index
 
 index = load_data()
