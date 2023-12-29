@@ -12,6 +12,7 @@ from llama_index import (
     StorageContext,
     load_index_from_storage,
     ServiceContext,
+    download_loader
 )
 
 st.set_page_config(page_title="Chat with your CareerScope results, powered by LlamaIndex", page_icon="🦙", layout="centered", initial_sidebar_state="auto", menu_items=None)
@@ -29,12 +30,15 @@ def load_data():
     with st.spinner(text="Loading and indexing your CareerScope results – hang tight! This should take 1-2 minutes."):
         PERSIST_DIR = "./storage"
         if not os.path.exists(PERSIST_DIR):
-          loader = CSVLoader(file_path="./data/occupation-salary-hourly.csv")
-          csv = loader.load()
+          
+          SimpleCSVReader = download_loader("SimpleCSVReader")
+
+          loader = SimpleCSVReader(encoding="utf-8")
+          csv = loader.load_data(file=Path('./data/occupation-salary-hourly.csv"'))
+
 
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
-          docs = reader.load_data()
-          docs.extend(csv)
+          docs = reader.load_data() + csv
           service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, 
                                                                     system_prompt="You are an expert on this CareerScope report. Your job is to answer technical questions. Assume that all questions are related to the assessment profile report and occupation hourly and annual rates information. Keep your answers technical and based on facts – do not hallucinate features."))
           index = VectorStoreIndex.from_documents(docs, service_context=service_context)
