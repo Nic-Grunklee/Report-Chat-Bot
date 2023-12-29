@@ -28,7 +28,8 @@ def load_data():
         if not os.path.exists(PERSIST_DIR):
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
           docs = reader.load_data()
-          service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, system_prompt="You are an expert on this CareerScope report and occupation salary/hourly information. Your job is to answer technical questions. Assume that all questions are related to the assessment profile report and occupation salary/hourly information. Keep your answers technical and based on facts – do not hallucinate features."))
+          service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, 
+                                                                    system_prompt="You are an expert on this CareerScope report. Your job is to answer technical questions. Assume that all questions are related to the assessment profile report and occupation hourly and annual rates information. Keep your answers technical and based on facts – do not hallucinate features."))
           index = VectorStoreIndex.from_documents(docs, service_context=service_context)
           # store it for later
           index.storage_context.persist(persist_dir=PERSIST_DIR)
