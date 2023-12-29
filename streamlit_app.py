@@ -31,7 +31,7 @@ def load_data():
         PERSIST_DIR = "./storage"
         if not os.path.exists(PERSIST_DIR):
           
-          SimpleCSVReader = download_loader("SimpleCSVReader")
+          SimpleCSVReader = download_loader("SimpleCSVReader", custom_path="local_dir")
 
           loader = SimpleCSVReader(encoding="utf-8")
           csv = loader.load_data(file=Path('./data/occupation-salary-hourly.csv"'))
@@ -39,6 +39,7 @@ def load_data():
 
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
           docs = reader.load_data() + csv
+
           service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, 
                                                                     system_prompt="You are an expert on this CareerScope report. Your job is to answer technical questions. Assume that all questions are related to the assessment profile report and occupation hourly and annual rates information. Keep your answers technical and based on facts – do not hallucinate features."))
           index = VectorStoreIndex.from_documents(docs, service_context=service_context)
