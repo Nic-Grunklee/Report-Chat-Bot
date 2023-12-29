@@ -33,8 +33,10 @@ def load_data():
           
           SimpleCSVReader = download_loader("SimpleCSVReader", custom_path="local_dir")
 
+          st.write(os.getcwd())
+
           loader = SimpleCSVReader(encoding="utf-8")
-          csv = loader.load_data(file=Path('/data/occupation-salary-hourly.csv"'))
+          csv = loader.load_data(file=Path('./data/occupation-salary-hourly.csv"'))
 
 
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
