@@ -33,7 +33,8 @@ def load_data():
           csv = loader.load()
 
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
-          docs = reader.load_data() + csv
+          docs = reader.load_data()
+          docs.extend(csv)
           service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, 
                                                                     system_prompt="You are an expert on this CareerScope report. Your job is to answer technical questions. Assume that all questions are related to the assessment profile report and occupation hourly and annual rates information. Keep your answers technical and based on facts – do not hallucinate features."))
           index = VectorStoreIndex.from_documents(docs, service_context=service_context)
