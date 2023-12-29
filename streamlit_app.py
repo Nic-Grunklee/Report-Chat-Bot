@@ -4,7 +4,6 @@ import openai
 import os.path
 
 from pathlib import Path
-from langchain.document_loaders.csv_loader import CSVLoader
 
 from llama_index import (
     VectorStoreIndex,
@@ -12,6 +11,7 @@ from llama_index import (
     StorageContext,
     load_index_from_storage,
     ServiceContext,
+    download_loader
 )
 
 st.set_page_config(page_title="Chat with your CareerScope results, powered by LlamaIndex", page_icon="🦙", layout="centered", initial_sidebar_state="auto", menu_items=None)
@@ -29,8 +29,10 @@ def load_data():
     with st.spinner(text="Loading and indexing your CareerScope results – hang tight! This should take 1-2 minutes."):
         PERSIST_DIR = "./storage"
         if not os.path.exists(PERSIST_DIR):
-          loader = CSVLoader(file_path="./data/occupation-salary-hourly.csv")
-          csv = loader.load()
+          SimpleCSVReader = download_loader("SimpleCSVReader")
+
+          loader = SimpleCSVReader(encoding="utf-8")
+          csv = loader.load_data(file=Path("./data/occupation-salary-hourly.csv"))
 
           reader = SimpleDirectoryReader(input_dir="./data", recursive=True)
           docs = reader.load_data() + csv
